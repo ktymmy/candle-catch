@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './view/page/navibar.dart';
+
 // import './const/colorConst.dart';
 
 void main() {
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         // scaffoldBackgroundColor: ColorConst.main,
       ),
-      home: Navibar(),
+      home: StartPage(),
     );
   }
 }
