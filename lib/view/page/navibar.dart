@@ -24,6 +24,7 @@ class _NavibarState extends State<Navibar> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
