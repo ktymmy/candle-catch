@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './view/page/navibar.dart';
-import './view/page/sign/start.dart';
+
+// import './const/colorConst.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,6 +17,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        // scaffoldBackgroundColor: ColorConst.main,
       ),
       home: StartPage(),
     );
