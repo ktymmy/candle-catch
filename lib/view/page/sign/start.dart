@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:candlecatch/view/page/sign/signIn.dart';
 import 'package:candlecatch/view/page/sign/signUp.dart';
 import 'package:candlecatch/constants/colors.dart';
+import 'package:candlecatch/view/components/button.dart';
 
 class Start extends StatefulWidget {
   const Start({super.key});
@@ -57,42 +58,6 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [Image.asset('images/signInPageImage.png', width: 367)],
-    );
-  }
-}
-
-// ボタン
-class BrandGradientButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-
-  const BrandGradientButton({
-    super.key,
-    required this.text,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 196,
-        height: 72,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: AppColors.kBrandGradient,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: AppColors.textWhite,
-            fontSize: 32,
-            fontFamily: "Corporate Logo Rounded Bold",
-          ),
-        ),
-      ),
     );
   }
 }
