@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import './view/page/navibar.dart';
 
 // import './const/colorConst.dart';
 
-void main() {
+void main() async {
+  // flutterEngineが初期化されるのを保証
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebaseの初期化処理
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const MyApp());
 }
 
