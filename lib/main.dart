@@ -1,9 +1,19 @@
+
+/***
+**
+*このpage新しくdevalopからpullするたびに自分のファイルにかきなおしてねーー
+ */
+
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import './view/page/navibar.dart';
 
-// import './const/colorConst.dart';
+
+import './view/page/addFriends/my_qr_screen.dart'; 
+
+
 
 void main() async {
   // flutterEngineが初期化されるのを保証
@@ -27,7 +37,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         // scaffoldBackgroundColor: ColorConst.main,
       ),
-      home: Navibar(),
+      home: const MyQrScreen(),
+      //home: NotificationScreen(),
+      //home: Navibar(),
     );
   }
 }
