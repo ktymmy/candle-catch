@@ -1,7 +1,16 @@
-import 'package:flutter/material.dart';
-import './view/page/navibar.dart';
+/***
+**
+*このpage新しくdevalopからpullするたびに自分のファイルにかきなおしてねーーー
+ */
 
+
+import 'package:flutter/material.dart';
+//import './view/page/navibar.dart';
+//import './view/page/src/alert.dart'; 
 // import './const/colorConst.dart';
+import './view/page/addFriends/my_qr_screen.dart'; 
+
+
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +28,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         // scaffoldBackgroundColor: ColorConst.main,
       ),
-      home: Navibar(),
+      home: const MyQrScreen(),
+      //home: NotificationScreen(),
+      //home: Navibar(),
     );
   }
 }
