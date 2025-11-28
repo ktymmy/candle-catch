@@ -1,3 +1,4 @@
+
 /***
 **
 *このpage新しくdevalopからpullするたびに自分のファイルにかきなおしてねーー
@@ -5,14 +6,22 @@
 
 
 import 'package:flutter/material.dart';
-//import './view/page/navibar.dart';
-//import './view/page/src/alert.dart'; 
-// import './const/colorConst.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import './view/page/navibar.dart';
+
+
 import './view/page/addFriends/my_qr_screen.dart'; 
 
 
 
-void main() {
+void main() async {
+  // flutterEngineが初期化されるのを保証
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebaseの初期化処理
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const MyApp());
 }
 
