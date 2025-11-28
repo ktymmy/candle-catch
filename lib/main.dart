@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import './view/page/navibar.dart';
+import './constants/colors.dart';
 
-// import './const/colorConst.dart';
-
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  await initializeDateFormatting('ja_JP').then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -17,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        // scaffoldBackgroundColor: ColorConst.main,
+        scaffoldBackgroundColor: AppColors.background,
       ),
       home: Navibar(),
     );
