@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "218998110533",
+    "project_id": "candle-catch",
+    "storage_bucket": "candle-catch.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:218998110533:android:56343ec4731f32e244a62c",
+        "android_client_info": {
+          "package_name": "com.example.candlecatch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAszCsgdU4UlolEVZwy6j_EOemxnj9H5tI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
