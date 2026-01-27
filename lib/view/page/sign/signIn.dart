@@ -3,6 +3,8 @@ import 'package:candlecatch/constants/colors.dart';
 import 'package:candlecatch/view/components/button.dart';
 import 'package:candlecatch/view/components/form.dart';
 import 'package:candlecatch/services/auth_service.dart';
+import 'package:candlecatch/view/page/src/calendar.dart';
+import 'package:candlecatch/view/page/navibar.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -124,6 +126,13 @@ class SignInState extends State<SignIn> {
                             );
                             // ホーム画面への遷移（必要に応じてコメントを外してください）
                             // Navigator.pushReplacementNamed(context, '/home');
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Navibar(),
+                              ),
+                              (route) => false,
+                            );
                           } else {
                             // 失敗時
                             ScaffoldMessenger.of(

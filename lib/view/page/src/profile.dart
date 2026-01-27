@@ -1,9 +1,19 @@
 //PAGE:プロフィール画面 Navibar右下
+
+import 'dart:convert';
+import 'package:candlecatch/services/auth_service.dart';
+import 'package:candlecatch/services/database_service.dart';
+import 'package:candlecatch/view/page/birthdayMemory/candle.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 ///const
 import 'package:candlecatch/constants/colors.dart';
+import 'package:candlecatch/view/page/birthdayMemory/YearDetail.dart';
+
 
 ///components
 import '../../components/button.dart';
@@ -13,17 +23,137 @@ import 'package:candlecatch/view/page/birthdayMemory/candle.dart';
 import './setting.dart';
 import '../addFriends/my_qr_screen.dart';
 
+
 // Profile 呼び出しの際に図鑑達成数取得
 class Profile extends StatelessWidget {
-  final int current; // 図鑑達成数
+  final String? uid;
 
-  const Profile({super.key, required this.current});
+  const Profile({super.key, this.uid});
+
+
+  @override
+  Widget build(BuildContext context) {
+    // uidが渡されていればそれを使い、なければ現在ログイン中の自分のUIDを使う
+    final String targetUid =
+        uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: targetUid.isEmpty
+          ? const Center(child: Text("ログインが必要です"))
+          : FutureBuilder<QuerySnapshot>(
+              // targetUidを使ってFirestoreを検索
+              future: FirebaseFirestore.instance
+                  .collection('users')
+                  .where('user_id', isEqualTo: targetUid)
+                  .get(),
+              builder: (context, snapshot) {
+                // 読み込み中
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                // エラーまたはデータが見つからない
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text("ユーザーデータが見つかりません"));
+                }
+
+                // データの取り出し
+                final userData =
+                    snapshot.data!.docs.first.data() as Map<String, dynamic>;
+
+                final String name = userData['name'] ?? 'Guest';
+                final String displayId = userData['display_id'] ?? 'no_id';
+
+                // 誕生日の変換処理
+                String birthdayStr = '----/--/--';
+                final dynamic rawBirthday = userData['birthday'];
+
+                if (rawBirthday is Timestamp) {
+                  DateTime date = rawBirthday.toDate();
+                  birthdayStr =
+                      "${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}";
+                } else if (rawBirthday is String) {
+                  birthdayStr = rawBirthday;
+                }
+
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      _ProfileHeader(
+                        name: name,
+                        displayId: displayId,
+                        birthday: birthdayStr,
+                        uid: targetUid,
+                      ),
+                      // 必要に応じて達成率バーやカルーセルをここに追加
+                      const SizedBox(height: 20),
+                      const _AchievementBar(progress: 0.5, current: 180),
+                      const SizedBox(height: 20),
+                      const _StackedCarouselPage(),
+                      const SizedBox(height: 200),
+                    ],
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+class _ProfileHeader extends StatelessWidget {
+  final String name;
+  final String displayId;
+  final String birthday;
+  final String uid;
+
+  // 受け取り口
+  const _ProfileHeader({
+    required this.name,
+    required this.displayId,
+    required this.birthday,
+    required this.uid,
+  });
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      backgroundColor: AppColors.background,
+
+    return Padding(
+      padding: EdgeInsets.only(
+        top: height * 0.08,
+        left: width * 0.05,
+        right: width * 0.05,
+      ),
+      child: Column(
+        children: [
+          _buildTopBar(context, displayId),
+          SizedBox(height: height * 0.03),
+          _buildUserInfo(context, width, height),
+        ],
+      ),
+    );
+  }
+
+  // ユーザー名とフレンド追加、設定アイコン
+  Widget _buildTopBar(BuildContext context, String displayId) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const SizedBox(width: 80),
+
+        Expanded(
+          child: Center(
+            child: Text(
+              '@$displayId',
+              style: const TextStyle(
+                fontSize: 16,
+                color: AppColors.textLightBlack,
+              ),
+            ),
       appBar: AppBar(
         backgroundColor: AppColors.background,
         toolbarHeight: height * 0.1,
@@ -58,7 +188,73 @@ class Profile extends StatelessWidget {
             color: AppColors.textBlack,
           ),
         ),
+
+        // 右側にボタンを2つ並べる
         Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildFriendButton(context),
+            _buildSettingsButton(context),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // フレンドボタン
+//   Widget _buildFriendButton(BuildContext context) {
+//     return IconButton(
+//       onPressed: () {
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(builder: (context) => const QrScanScreen()),
+//         );
+//       },
+//       icon: Image.asset('images/addFriend.png', width: 28, height: 28),
+//     );
+//   }
+
+  // 設定アイコンのボタン
+//   Widget _buildSettingsButton(BuildContext context) {
+//     return IconButton(
+//       icon: const Icon(Icons.settings, color: AppColors.textBlack, size: 28),
+//       onPressed: () {
+//         // 設定画面などの遷移先をここに
+//       },
+//     );
+//   }
+
+  Widget _buildUserInfo(BuildContext context, double width, double height) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        const CircleAvatar(
+          radius: 40,
+          backgroundImage: AssetImage('images/card1.JPEG'),
+          backgroundColor: AppColors.textLightBlack,
+        ),
+        SizedBox(width: width * 0.05),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              name,
+              style: const TextStyle(
+                fontSize: 22,
+                color: AppColors.textBlack,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: height * 0.005),
+            Text(
+              birthday,
+              style: const TextStyle(
+                fontSize: 32,
+                fontFamily: "Corporate Logo Rounded Bold",
+                color: AppColors.textBlack,
+              ),
+            ),
+          ],
           children: <Widget>[
             TopCircleButton(
               icon: Icons.qr_code_2,
@@ -91,20 +287,20 @@ class Profile extends StatelessWidget {
 
   //user情報
   //TODO: サイズ調整必要
-  Widget _buildUserInfo() {
-    final String img = "icon/icon1.png";
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Image.asset(img),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [Text('SOTA'), Text('2004/10/10')],
-        ),
-      ],
-    );
-  }
+//   Widget _buildUserInfo() {
+//     final String img = "icon/icon1.png";
+//     return Row(
+//       mainAxisAlignment: MainAxisAlignment.center,
+//       children: [
+//         Image.asset(img),
+//         const SizedBox(width: 12),
+//         Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: const [Text('SOTA'), Text('2004/10/10')],
+//         ),
+//       ],
+//     );
+//   }
 }
 
 class _AchievementBar extends StatefulWidget {
@@ -210,7 +406,8 @@ class _StackedCarouselPageState extends State<_StackedCarouselPage> {
     super.initState();
     _pageController = PageController(
       viewportFraction: 0.6, // 中央のカードの表示領域 (60%)
-      initialPage: cardImages.length,
+      initialPage: 0,
+      // initialPage: cardImages.length,
     );
 
     // ページ監視
@@ -230,46 +427,39 @@ class _StackedCarouselPageState extends State<_StackedCarouselPage> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          height: height * 0.45, // カルーセルの高さを指定
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: cardImages.length,
-            itemBuilder: (context, index) {
-              // 各カードのオフセット（中央からの距離）
-              // _currentPageはdoubleなので、indexとの差が正確な位置を示す
-              final double relativePosition = index - _currentPage;
-              //TODO: 追加リストから画像パスと年度を取り出す
-              final String imagePath = cardImages[index][0];
-              final String year = cardImages[index][1];
-              // 奥に行くほど小さく、不透明になるように調整
-              // 完全に画面外に出たカードは極端に小さく、透明にする
-              final double scale =
-                  1.0 - (relativePosition.abs() * -0.3); // 0.2は調整値
-              final double opacity =
-                  1.0 - (relativePosition.abs() * 0.3); // 0.3は調整値
 
-              // 奥に行くほどY軸方向に少しずらす (写真のUIに合わせる)
-              final double offsetY = relativePosition.abs() * 20; // 20は調整値
+    return SizedBox(
+      height: height * 0.45, // 画面の半分程度の高さに収める
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: cardImages.length,
+        itemBuilder: (context, index) {
+          final double relativePosition = index - _currentPage;
+          final String imagePath = cardImages[index][0];
+          final String year = cardImages[index][1];
 
-              return _buildCard(
-                imagePath: imagePath,
-                year: year,
-                scale: math.max(0.7, scale), // 最小スケールを設定 (0.7より小さくならない)
-                opacity: math.max(0.0, opacity), // 最小不透明度を設定 (0.0より小さくならない)
-                offsetY: offsetY,
-                relativePosition: relativePosition,
-                isCurrentPage:
-                    (index == _currentPage.round()), // 中央のカードかどうかの簡易判定
-              );
-            },
-          ),
-        ),
-      ],
+          //計算
+          final double calculatedScale =
+              1.0 - (relativePosition.abs() * 0.2); // 0.5だと小さくなりすぎたので0.2に調整
+          final double finalScale = math.max(0.7, calculatedScale);
+
+          final double calculatedOpacity = 1.0 - (relativePosition.abs() * 0.3);
+          final double finalOpacity = math.max(0.0, calculatedOpacity);
+
+          final double offsetY = relativePosition.abs() * 20;
+
+          // _buildCard呼び出し
+          return _buildCard(
+            imagePath: imagePath,
+            year: year,
+            scale: finalScale,
+            opacity: finalOpacity,
+            offsetY: offsetY,
+            relativePosition: relativePosition,
+            isCurrentPage: (index == _currentPage.round()),
+          );
+        },
+      ),
     );
   }
 
@@ -283,6 +473,9 @@ class _StackedCarouselPageState extends State<_StackedCarouselPage> {
     required bool isCurrentPage,
   }) {
     final height = MediaQuery.of(context).size.height;
+    Key? cardKey = isCurrentPage ? ValueKey('center_card_$imagePath') : null;
+
+
     final width = MediaQuery.of(context).size.width;
 
     final double calculatedScale = 1.0 - (relativePosition.abs() * 0.5);
@@ -296,24 +489,20 @@ class _StackedCarouselPageState extends State<_StackedCarouselPage> {
 
     final double currentOffsetY = relativePosition.abs() * 0;
 
-    Key? cardKey = isCurrentPage
-        ? ValueKey('center_card_$imagePath')
-        : null; // add
+//     Key? cardKey = isCurrentPage
+//         ? ValueKey('center_card_$imagePath')
+//         : null; // add
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Transform.translate(
-          key: cardKey, // add
-          // X軸の移動量を適用
-          offset: Offset(
-            offsetX,
-            currentOffsetY * (relativePosition > 0 ? 1 : -1),
-          ),
+          key: cardKey,
+          offset: Offset(0, offsetY * (relativePosition > 0 ? 1 : -1)),
           child: Transform.scale(
-            scale: finalScale, // ここに計算した finalScale を適用
+            scale: scale,
             alignment: Alignment.center,
             child: Opacity(
-              opacity: finalOpacity,
+              opacity: opacity,
               child: GestureDetector(
                 onTap: () {
                   if (isCurrentPage) {
@@ -325,45 +514,39 @@ class _StackedCarouselPageState extends State<_StackedCarouselPage> {
                       ),
                     );
                   } else {
-                    // 中央以外のカードがタップされたら、そのカードを中央に持ってくる
                     _pageController.animateToPage(
-                      _pageController.position.pixels ~/
-                              _pageController.position.viewportDimension +
-                          relativePosition.round(),
-                      duration: Duration(milliseconds: 300),
+                      _pageController.page!.round() + relativePosition.round(),
+                      duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
                     );
                   }
                 },
                 child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 0.0,
-                    vertical: height * 0.02,
-                  ),
+                  margin: EdgeInsets.symmetric(vertical: height * 0.01),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1), //TODO: 色を変更
+                        color: Colors.black.withOpacity(0.1),
                         blurRadius: 10,
-                        offset: Offset(0, 5),
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(5.0),
                     child: Hero(
-                      tag: imagePath,
+                      tag: imagePath + year, // tagをユニークにするためyearを追加
                       child: Image.asset(
                         imagePath,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: AppColors.textLightBlack,
                           alignment: Alignment.center,
-                          child: Icon(
+                          child: const Icon(
                             Icons.image_not_supported,
                             size: 50,
-                            color: AppColors.textLightBlack,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -374,26 +557,17 @@ class _StackedCarouselPageState extends State<_StackedCarouselPage> {
             ),
           ),
         ),
-        if (isCurrentPage) ...[
+        if (isCurrentPage)
           Text(
-            "$year", //TODO: 名表示
+            year,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: "Corporate Logo Rounded Bold",
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: AppColors.textLightBlack,
-              // TODO: 影いる？
-              // shadows: [
-              //   Shadow(
-              //     blurRadius: 3,
-              //     color: Colors.black.withOpacity(0.4),
-              //     offset: Offset(1, 1),
-              //   ),
-              // ],
             ),
           ),
-        ],
       ],
     );
   }

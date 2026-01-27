@@ -17,7 +17,11 @@ class SignUpState extends State<SignUp> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
+  final TextEditingController _birthdayController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // Firebase送信用の日付データ（初期値：今日）
+  DateTime _selectedDate = DateTime(2000, 1, 1);
 
   bool _isLoading = false;
 
@@ -26,7 +30,26 @@ class SignUpState extends State<SignUp> {
     _emailController.dispose();
     _nameController.dispose();
     _idController.dispose();
+    _birthdayController.dispose();
     _passwordController.dispose();
+  }
+
+  // 日付カレンダーを表示する関数
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate, // 現在の選択値を初期値にする
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        // 3. ここも修正：選んだ日付を変数に保存
+        _selectedDate = picked;
+        _birthdayController.text =
+            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      });
+    }
   }
 
   @override
@@ -67,6 +90,21 @@ class SignUpState extends State<SignUp> {
                       obscureText: false,
                     ),
                     SizedBox(height: height * 0.03),
+
+                    // 誕生日の項目追加
+                    GestureDetector(
+                      onTap: () => _selectDate(context),
+                      child: AbsorbPointer(
+                        // TextField辞退のタップ反応を無効化してGestureDetectorを優先
+                        child: CustomTextField(
+                          controller: _birthdayController,
+                          labelText: '誕生日',
+                          hintText: 'タップして選択',
+                          obscureText: false,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: height * 0.03),
                     CustomTextField(
                       controller: _passwordController,
                       labelText: 'パスワード',
@@ -87,7 +125,10 @@ class SignUpState extends State<SignUp> {
                             onPressed: () async {
                               // 空チェック
                               if (_emailController.text.isEmpty ||
-                                  _passwordController.text.isEmpty) {
+                                  _passwordController.text.isEmpty ||
+                                  _nameController.text.isEmpty ||
+                                  _idController.text.isEmpty ||
+                                  _birthdayController.text.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('必須項目を入力してください'),
@@ -98,11 +139,15 @@ class SignUpState extends State<SignUp> {
 
                               setState(() => _isLoading = true);
 
+                              //DateTime selectedBirthday = _selectedDate;
+
                               // AuthServiceの呼び出し
                               String? result = await AuthService().signUp(
                                 _emailController.text.trim(),
                                 _passwordController.text.trim(),
                                 _nameController.text.trim(),
+                                _idController.text.trim(),
+                                _selectedDate, // 関数名ではなく「変数名」を渡す
                               );
 
                               if (!context.mounted) return;

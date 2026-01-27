@@ -1,10 +1,14 @@
+import 'package:candlecatch/view/page/addFriends/qr_scan_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // timestampのため
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:candlecatch/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../../constants/colors.dart';
 import '../../components/button.dart';
 
-import '../../../data/birthday_data.dart'; //仮データ
-import '../../../model/birthday_model.dart'; //データモデル
+// import '../../../data/birthday_data.dart'; //仮データ
+// import '../../../model/birthday_model.dart'; //データモデル
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -18,6 +22,7 @@ class _HomeState extends State<Home> {
   DateTime _focusedMonth = DateTime.now();
   late final PageController _pageController;
   final int _initialPage = 1200;
+  final String _uid = FirebaseAuth.instance.currentUser?.uid ?? ''; // uidの取得
 
   @override
   void initState() {
@@ -36,20 +41,11 @@ class _HomeState extends State<Home> {
     return DateTime(DateTime.now().year, DateTime.now().month + diff);
   }
 
-  bool _isToday(int day) {
+  bool _isToday(int day, DateTime month) {
     final now = DateTime.now();
     return now.year == _focusedMonth.year &&
         now.month == _focusedMonth.month &&
         now.day == day;
-  }
-
-  List<BirthdayData> _getBirthdays(int day) {
-    return birthdayList
-        .where(
-          (b) =>
-              b.birthday.month == _focusedMonth.month && b.birthday.day == day,
-        )
-        .toList();
   }
 
   @override
@@ -113,39 +109,67 @@ class _HomeState extends State<Home> {
                         month.month,
                       );
 
-                      return GridView.builder(
-                        padding: const EdgeInsets.all(8),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 7,
-                              mainAxisSpacing: 8,
-                              crossAxisSpacing: 6,
-                              childAspectRatio: 0.55,
-                            ),
-                        itemCount: daysInMonth,
-                        itemBuilder: (context, index) {
-                          final day = index + 1;
+                      // ここでFirestoreからその月のデータを取得
+                      return StreamBuilder<List<Map<String, dynamic>>>(
+                        stream: DatabaseService().streamMonthlyCelebrations(
+                          _uid,
+                          month.year,
+                          month.month,
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
 
-                          return DayImageCard(
-                            day: day,
-                            birthdays: birthdayList
-                                .where(
-                                  (b) =>
-                                      b.birthday.month == month.month &&
-                                      b.birthday.day == day,
-                                )
-                                .toList(),
-                            isToday:
-                                DateTime.now().year == month.year &&
-                                DateTime.now().month == month.month &&
-                                DateTime.now().day == day,
-                            isSelected: _selectedDay == day,
-                            onTap: () {
-                              setState(() {
-                                _selectedDay = day;
-                              });
+                          final List<Map<String, dynamic>> monthlyCelebrations =
+                              snapshot.data ?? [];
+
+                          return GridView.builder(
+                            padding: const EdgeInsets.all(8),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 7,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 6,
+                                  childAspectRatio: 0.55,
+                                ),
+                            itemCount: daysInMonth,
+                            itemBuilder: (context, index) {
+                              final day = index + 1;
+
+                              // その日のデータだけをフィルタリング
+                              final dayDataList = monthlyCelebrations.where((
+                                data,
+                              ) {
+                                // フィードが存在しているか、Timestamp型かを確認しながら取得
+                                final dynamic timestamp =
+                                    data['celebration_date'];
+                                if (timestamp is Timestamp) {
+                                  final date = timestamp.toDate();
+
+                                  // 月・日が一致するかチェック（月をまたいだ表示を防ぐため）
+                                  return date.month == month.month &&
+                                      date.day == day;
+                                }
+                                return false;
+                              }).toList();
+
+                              return DayImageCard(
+                                day: day,
+                                celebrations: dayDataList, // 定義と名前を一致させた
+                                isToday: _isToday(day, month),
+                                isSelected: _selectedDay == day,
+                                focusedMonth: month,
+                                onTap: () {
+                                  setState(() {
+                                    _selectedDay = day;
+                                  });
+                                },
+                              );
                             },
-                            focusedMonth: month,
                           );
                         },
                       );
@@ -154,6 +178,8 @@ class _HomeState extends State<Home> {
                 ),
               ],
             ),
+
+            // 右上のボタン
             Positioned(
               top: 12,
               right: 16,
@@ -162,6 +188,14 @@ class _HomeState extends State<Home> {
                   TopCircleButton(
                     icon: Icons.cake,
                     onTap: () {
+                      print('Cake Button Tapped!');
+                      // QrScanScreenへ遷移
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const QrScanScreen(),
+                        ),
+                      );
                       print('tap');
                       //TODO: 誕生日一覧
                     },
@@ -188,7 +222,7 @@ class _HomeState extends State<Home> {
 /// セル
 class DayImageCard extends StatefulWidget {
   final int day;
-  final List<BirthdayData> birthdays;
+  final List<Map<String, dynamic>> celebrations;
   final bool isToday;
   final bool isSelected;
   final VoidCallback onTap;
@@ -197,7 +231,7 @@ class DayImageCard extends StatefulWidget {
   const DayImageCard({
     super.key,
     required this.day,
-    required this.birthdays,
+    required this.celebrations,
     required this.isToday,
     required this.isSelected,
     required this.onTap,
@@ -217,10 +251,15 @@ class _DayImageCardState extends State<DayImageCard> {
   void initState() {
     super.initState();
     _controller = PageController();
+    _startTimer();
+  }
 
-    if (widget.birthdays.length > 1) {
+  void _startTimer() {
+    // 内部でも widget.celebrations を参照
+    if (widget.celebrations.length > 1) {
       _timer = Timer.periodic(const Duration(seconds: 3), (_) {
-        _index = (_index + 1) % widget.birthdays.length;
+        if (!mounted) return;
+        _index = (_index + 1) % widget.celebrations.length;
         _controller.animateToPage(
           _index,
           duration: const Duration(milliseconds: 400),
@@ -280,7 +319,7 @@ class _DayImageCardState extends State<DayImageCard> {
                   const SizedBox(height: 12),
 
                   /// 誕生日データがない場合
-                  if (widget.birthdays.isEmpty)
+                  if (widget.celebrations.isEmpty)
                     const Center(
                       child: Padding(
                         padding: EdgeInsets.all(16),
@@ -291,31 +330,25 @@ class _DayImageCardState extends State<DayImageCard> {
                       ),
                     )
                   else
-                    /// データがある場合は縦にリスト表示
-                    ...widget.birthdays.map(
-                      (b) => Card(
+                    ...widget.celebrations.map(
+                      (data) => Card(
                         color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 3,
-                        margin: const EdgeInsets.symmetric(vertical: 6),
                         child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(
-                              b.imagePath,
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                            ),
+                          leading: const CircleAvatar(
+                            child: Icon(Icons.person),
                           ),
                           title: Text(
-                            b.name,
+                            data['sender_name'] ?? 'なまえ',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            '${b.birthday.month}月${b.birthday.day}日',
+                            // data['message'] が Map かどうかを確認し、その中の 'content' を取得
+                            (data['message'] != null &&
+                                    data['message'] is Map &&
+                                    data['message']['content'] != null)
+                                ? data['message']['content']
+                                : 'メッセージはありません', // データがない場合の表示
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ),
                       ),
@@ -331,8 +364,6 @@ class _DayImageCardState extends State<DayImageCard> {
 
   @override
   Widget build(BuildContext context) {
-    final hasBirthday = widget.birthdays.isNotEmpty;
-
     return GestureDetector(
       onTap: () {
         widget.onTap();
@@ -361,31 +392,45 @@ class _DayImageCardState extends State<DayImageCard> {
             const SizedBox(height: 6),
 
             Expanded(
-              child: hasBirthday
+              child: widget.celebrations.isNotEmpty
                   ? PageView.builder(
                       controller: _controller,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.birthdays.length,
+                      itemCount: widget.celebrations.length,
                       itemBuilder: (context, i) {
-                        final b = widget.birthdays[i];
+                        final data = widget.celebrations[i];
+                        final imageUrl =
+                            data['sender_image']; // Firestoreのフィールド名
+
                         return Column(
                           children: [
                             Expanded(
-                              child: Image.asset(
-                                b.imagePath,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
+                              child: CircleAvatar(
+                                radius: 12,
+                                backgroundColor: Colors.transparent,
+                                // 画像URLがある場合はそれを表示、ない場合はケーキアイコン
+                                backgroundImage:
+                                    (imageUrl != null && imageUrl.isNotEmpty)
+                                    ? NetworkImage(imageUrl)
+                                    : null,
+                                child: (imageUrl == null || imageUrl.isEmpty)
+                                    ? const Icon(
+                                        Icons.cake,
+                                        color: Colors.orangeAccent,
+                                        size: 16,
+                                      )
+                                    : null,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(bottom: 6),
                               child: Text(
-                                b.name,
+                                data['sender_name'] ?? 'なまえ',
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
