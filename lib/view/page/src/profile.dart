@@ -14,7 +14,6 @@ import 'dart:math' as math;
 import 'package:candlecatch/constants/colors.dart';
 import 'package:candlecatch/view/page/birthdayMemory/YearDetail.dart';
 
-
 ///components
 import '../../components/button.dart';
 
@@ -23,13 +22,11 @@ import 'package:candlecatch/view/page/birthdayMemory/candle.dart';
 import './setting.dart';
 import '../addFriends/my_qr_screen.dart';
 
-
 // Profile 呼び出しの際に図鑑達成数取得
 class Profile extends StatelessWidget {
   final String? uid;
 
   const Profile({super.key, this.uid});
-
 
   @override
   Widget build(BuildContext context) {
@@ -138,50 +135,14 @@ class _ProfileHeader extends StatelessWidget {
     );
   }
 
-  // ユーザー名とフレンド追加、設定アイコン
-  Widget _buildTopBar(BuildContext context, String displayId) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const SizedBox(width: 80),
-
-        Expanded(
-          child: Center(
-            child: Text(
-              '@$displayId',
-              style: const TextStyle(
-                fontSize: 16,
-                color: AppColors.textLightBlack,
-              ),
-            ),
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        toolbarHeight: height * 0.1,
-        elevation: 0,
-        title: _buildTopBar(context),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: height * 0.05),
-            Align(alignment: Alignment.center, child: _buildUserInfo()),
-            SizedBox(height: height * 0.05),
-            _AchievementBar(progress: current / 366, current: current),
-            _StackedCarouselPage(),
-          ],
-        ),
-      ),
-    );
-  }
-
   //topbar
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildTopBar(BuildContext context, String displayId) {
     final width = MediaQuery.of(context).size.width;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        const Text(
-          'sota_sota',
+        Text(
+          '@$displayId',
           style: TextStyle(
             fontSize: 30,
             fontFamily: "Corporate Logo Rounded Bold",
@@ -189,40 +150,34 @@ class _ProfileHeader extends StatelessWidget {
           ),
         ),
 
-        // 右側にボタンを2つ並べる
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildFriendButton(context),
-            _buildSettingsButton(context),
+            TopCircleButton(
+              icon: Icons.qr_code_2,
+              onTap: () {
+                print('tap');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyQrScreen()),
+                );
+              },
+            ),
+            SizedBox(width: width * 0.03),
+            TopCircleButton(
+              icon: Icons.settings,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Setting()),
+                );
+              },
+            ),
           ],
         ),
       ],
     );
   }
-
-  // フレンドボタン
-//   Widget _buildFriendButton(BuildContext context) {
-//     return IconButton(
-//       onPressed: () {
-//         Navigator.push(
-//           context,
-//           MaterialPageRoute(builder: (context) => const QrScanScreen()),
-//         );
-//       },
-//       icon: Image.asset('images/addFriend.png', width: 28, height: 28),
-//     );
-//   }
-
-  // 設定アイコンのボタン
-//   Widget _buildSettingsButton(BuildContext context) {
-//     return IconButton(
-//       icon: const Icon(Icons.settings, color: AppColors.textBlack, size: 28),
-//       onPressed: () {
-//         // 設定画面などの遷移先をここに
-//       },
-//     );
-//   }
 
   Widget _buildUserInfo(BuildContext context, double width, double height) {
     return Row(
@@ -255,52 +210,10 @@ class _ProfileHeader extends StatelessWidget {
               ),
             ),
           ],
-          children: <Widget>[
-            TopCircleButton(
-              icon: Icons.qr_code_2,
-              onTap: () {
-                // フレンド画面へ遷移
-                print('tap');
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyQrScreen()),
-                );
-              },
-            ),
-            SizedBox(width: width * 0.03),
-            // _buildSettingsButton(context),
-            TopCircleButton(
-              icon: Icons.settings,
-              onTap: () {
-                // 設定画面へ遷移
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Setting()),
-                );
-              },
-            ),
-          ],
         ),
       ],
     );
   }
-
-  //user情報
-  //TODO: サイズ調整必要
-//   Widget _buildUserInfo() {
-//     final String img = "icon/icon1.png";
-//     return Row(
-//       mainAxisAlignment: MainAxisAlignment.center,
-//       children: [
-//         Image.asset(img),
-//         const SizedBox(width: 12),
-//         Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: const [Text('SOTA'), Text('2004/10/10')],
-//         ),
-//       ],
-//     );
-//   }
 }
 
 class _AchievementBar extends StatefulWidget {
@@ -475,7 +388,6 @@ class _StackedCarouselPageState extends State<_StackedCarouselPage> {
     final height = MediaQuery.of(context).size.height;
     Key? cardKey = isCurrentPage ? ValueKey('center_card_$imagePath') : null;
 
-
     final width = MediaQuery.of(context).size.width;
 
     final double calculatedScale = 1.0 - (relativePosition.abs() * 0.5);
@@ -489,9 +401,9 @@ class _StackedCarouselPageState extends State<_StackedCarouselPage> {
 
     final double currentOffsetY = relativePosition.abs() * 0;
 
-//     Key? cardKey = isCurrentPage
-//         ? ValueKey('center_card_$imagePath')
-//         : null; // add
+    //     Key? cardKey = isCurrentPage
+    //         ? ValueKey('center_card_$imagePath')
+    //         : null; // add
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
