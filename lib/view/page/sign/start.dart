@@ -1,4 +1,4 @@
-//新規登録かログインか選ぶ画面
+//PAGE:新規登録かログインか選ぶ画面
 import 'package:flutter/material.dart';
 import 'package:candlecatch/view/page/sign/signIn.dart';
 import 'package:candlecatch/view/page/sign/signUp.dart';

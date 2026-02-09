@@ -1,8 +1,11 @@
-//B-signalの通知画面　Navibar左下
+//PAGE:B-signalの通知画面　Navibar左下
 import 'package:flutter/material.dart';
 
 import '../../../model/b-signal_model.dart';
 import '../../../data/b-signal_data.dart'; //仮データ
+import '../../components/button.dart';
+import '../../../constants/colors.dart';
+import '../celebrate/confirmation.dart';
 
 class Bsignal extends StatefulWidget {
   const Bsignal({super.key});
@@ -15,12 +18,12 @@ class _BsignalState extends State<Bsignal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF6E5),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
-            _buildSearchBar(),
+            // _buildSearchBar(),
             Expanded(
               child: ListView.builder(
                 itemCount: users.length,
@@ -65,51 +68,54 @@ class _BsignalState extends State<Bsignal> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Container(
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade300,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: const Row(
-          children: [
-            SizedBox(width: 12),
-            Icon(Icons.search, color: Colors.grey),
-            SizedBox(width: 8),
-            Text('検索', style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildSearchBar() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  //     child: Container(
+  //       height: 40,
+  //       decoration: BoxDecoration(
+  //         color: Colors.grey.shade300,
+  //         borderRadius: BorderRadius.circular(20),
+  //       ),
+  //       child: const Row(
+  //         children: [
+  //           SizedBox(width: 12),
+  //           Icon(Icons.search, color: Colors.grey),
+  //           SizedBox(width: 8),
+  //           Text('検索', style: TextStyle(color: Colors.grey)),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildListItem(EncounterUser user) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          const CircleAvatar(radius: 28, backgroundColor: Colors.grey),
+          const CircleAvatar(
+            radius: 28,
+            backgroundColor: AppColors.accentOrange,
+            child: Icon(Icons.person, color: Colors.white),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(user.name, style: const TextStyle(fontSize: 16)),
           ),
-          ElevatedButton(
-            onPressed: () {
-              //TODO: 祝う処理
-              print('tap');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey.shade300,
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              elevation: 0,
+          Container(
+            width: width * 0.25,
+            child: BrandGradientButton(
+              text: '祝う',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GiftConfirmPage()),
+                );
+              },
             ),
-            child: const Text('祝う'),
           ),
         ],
       ),

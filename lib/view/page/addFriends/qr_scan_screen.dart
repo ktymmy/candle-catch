@@ -1,3 +1,4 @@
+//PAGE:QRコードスキャン画面
 import 'package:flutter/material.dart';
 import 'friend_profile_screen.dart'; // プロフィール画面への遷移用
 
@@ -7,10 +8,9 @@ class QrScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // カメラプレビューの代わりの黒背景
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // カメラプレビューのモック
           Center(
             child: Container(
               width: double.infinity,
@@ -24,7 +24,7 @@ class QrScanScreen extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // スキャン枠
           Center(
             child: GestureDetector(
@@ -32,7 +32,11 @@ class QrScanScreen extends StatelessWidget {
                 // タップで読み取り成功とみなし、次の画面へ遷移
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const FriendProfileScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const FriendProfileScreen(
+                      friendUid: 'friend_user_abc_123',
+                    ),
+                  ),
                 );
               },
               child: Container(
@@ -49,10 +53,14 @@ class QrScanScreen extends StatelessWidget {
                     Positioned(top: 10, right: 10, child: _CornerMark(1)),
                     Positioned(bottom: 10, left: 10, child: _CornerMark(2)),
                     Positioned(bottom: 10, right: 10, child: _CornerMark(3)),
-                    
+
                     // 中央のQRイメージ
                     const Center(
-                      child: Icon(Icons.qr_code, color: Colors.white, size: 180),
+                      child: Icon(
+                        Icons.qr_code,
+                        color: Colors.white,
+                        size: 180,
+                      ),
                     ),
                   ],
                 ),
@@ -65,11 +73,14 @@ class QrScanScreen extends StatelessWidget {
             top: 50,
             left: 20,
             child: IconButton(
-              icon: const Icon(Icons.chevron_left, color: Colors.white, size: 35),
+              icon: const Icon(
+                Icons.chevron_left,
+                color: Colors.white,
+                size: 35,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          
 
           // 下部の案内テキスト
           const Positioned(
@@ -101,10 +112,18 @@ class _CornerMark extends StatelessWidget {
       height: 20,
       decoration: BoxDecoration(
         border: Border(
-          top: (position < 2) ? const BorderSide(color: Colors.white, width: 4) : BorderSide.none,
-          bottom: (position >= 2) ? const BorderSide(color: Colors.white, width: 4) : BorderSide.none,
-          left: (position % 2 == 0) ? const BorderSide(color: Colors.white, width: 4) : BorderSide.none,
-          right: (position % 2 != 0) ? const BorderSide(color: Colors.white, width: 4) : BorderSide.none,
+          top: (position < 2)
+              ? const BorderSide(color: Colors.white, width: 4)
+              : BorderSide.none,
+          bottom: (position >= 2)
+              ? const BorderSide(color: Colors.white, width: 4)
+              : BorderSide.none,
+          left: (position % 2 == 0)
+              ? const BorderSide(color: Colors.white, width: 4)
+              : BorderSide.none,
+          right: (position % 2 != 0)
+              ? const BorderSide(color: Colors.white, width: 4)
+              : BorderSide.none,
         ),
       ),
     );

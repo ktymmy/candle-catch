@@ -1,4 +1,4 @@
-import 'package:candlecatch/view/page/addFriends/qr_scan_screen.dart';
+//PAGE:カレンダー(home)
 import 'package:firebase_auth/firebase_auth.dart'; // timestampのため
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:candlecatch/services/database_service.dart';
@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../../constants/colors.dart';
 import '../../components/button.dart';
-
-// import '../../../data/birthday_data.dart'; //仮データ
-// import '../../../model/birthday_model.dart'; //データモデル
+import '../birthdayCard/birthday_swipe_page.dart';
+import '../celebrate/confirmation.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -193,7 +192,7 @@ class _HomeState extends State<Home> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const QrScanScreen(),
+                          builder: (context) => const BirthdaySwipePage(),
                         ),
                       );
                       print('tap');
@@ -302,7 +301,7 @@ class _DayImageCardState extends State<DayImageCard> {
                       height: 4,
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: Colors.grey[400],
+                        // color: Colors.grey[400],
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -333,22 +332,52 @@ class _DayImageCardState extends State<DayImageCard> {
                     ...widget.celebrations.map(
                       (data) => Card(
                         color: Colors.white,
+                        elevation: 3,
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          //TODO: 画像表示
                           leading: const CircleAvatar(
-                            child: Icon(Icons.person),
+                            radius: 24,
+                            backgroundColor: Color(0xFFFFE0B2),
+                            child: Icon(Icons.person, color: Colors.brown),
                           ),
-                          title: Text(
-                            data['sender_name'] ?? 'なまえ',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            // data['message'] が Map かどうかを確認し、その中の 'content' を取得
-                            (data['message'] != null &&
-                                    data['message'] is Map &&
-                                    data['message']['content'] != null)
-                                ? data['message']['content']
-                                : 'メッセージはありません', // データがない場合の表示
-                            style: const TextStyle(color: Colors.grey),
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  data['sender_name'] ?? 'なまえ',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+
+                              Expanded(
+                                child: BrandGradientButton(
+                                  text: '祝う',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const GiftConfirmPage(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -405,14 +434,18 @@ class _DayImageCardState extends State<DayImageCard> {
                         return Column(
                           children: [
                             Expanded(
-                              child: CircleAvatar(
-                                radius: 12,
-                                backgroundColor: Colors.transparent,
-                                // 画像URLがある場合はそれを表示、ない場合はケーキアイコン
-                                backgroundImage:
-                                    (imageUrl != null && imageUrl.isNotEmpty)
-                                    ? NetworkImage(imageUrl)
-                                    : null,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200], // 画像がないときの背景色
+                                  image:
+                                      (imageUrl != null && imageUrl.isNotEmpty)
+                                      ? DecorationImage(
+                                          image: NetworkImage(imageUrl),
+                                          fit: BoxFit
+                                              .cover, // 画像をContainerいっぱいにフィットさせる
+                                        )
+                                      : null,
+                                ),
                                 child: (imageUrl == null || imageUrl.isEmpty)
                                     ? const Icon(
                                         Icons.cake,
@@ -422,6 +455,7 @@ class _DayImageCardState extends State<DayImageCard> {
                                     : null,
                               ),
                             ),
+
                             Padding(
                               padding: const EdgeInsets.only(bottom: 6),
                               child: Text(

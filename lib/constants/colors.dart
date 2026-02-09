@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   // 背景色
   static const Color background = Color(0xFFFFF8E7);
+  static const Color bt = Color(0xffFDA085);
 
   // グラデーション色
   static const Color gradientStart = Color(0xffF6D365);

@@ -8,6 +8,7 @@ import './view/page/sign/signIn.dart';
 import './view/page/navibar.dart';
 import './constants/colors.dart';
 import 'firebase_options.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,17 @@ Future<void> main() async {
 
   // 日本語ロケールの初期化
   await initializeDateFormatting('ja_JP');
+
+  MaterialApp(
+    locale: const Locale('ja', 'JP'),
+    supportedLocales: const [Locale('ja', 'JP'), Locale('en', 'US')],
+    localizationsDelegates: const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    home: const MyApp(),
+  );
 
   // アプリ起動
   runApp(const MyApp());
@@ -38,28 +50,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const StartPage(), // TODO: 初期画面に
+      home: const StartPage(),
     );
   }
 }
-
-// TODO:本番は↓
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       color: AppColors.background,
-//       title: 'Candle Catch',
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-//       ),
-//       // 起動時に必ずStartpage（選択画面）を表示する
-//       home: const StartPage(),
-//       //home: const Navibar(), // TODO: 初期画面に
-//     ),
-//   }
-// }

@@ -4,6 +4,7 @@ import 'package:candlecatch/constants/colors.dart';
 import 'package:candlecatch/view/components/form.dart';
 import 'package:candlecatch/view/components/button.dart';
 import 'package:candlecatch/services/auth_service.dart';
+import 'package:flutter/cupertino.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -36,20 +37,86 @@ class SignUpState extends State<SignUp> {
 
   // 日付カレンダーを表示する関数
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    DateTime tempPickedDate = _selectedDate;
+
+    await showModalBottomSheet(
       context: context,
-      initialDate: _selectedDate, // 現在の選択値を初期値にする
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return Container(
+          height: 320,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Text(
+                        'キャンセル',
+                        style: TextStyle(
+                          color: Color(0xFF007AFF),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      '誕生日',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedDate = tempPickedDate;
+                          _birthdayController.text =
+                              "${tempPickedDate.year}-${tempPickedDate.month.toString().padLeft(2, '0')}-${tempPickedDate.day.toString().padLeft(2, '0')}";
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        '完了',
+                        style: TextStyle(
+                          color: Color(0xFF007AFF),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Divider(height: 1),
+
+              // ===== iOS風 DatePicker =====
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: _selectedDate,
+                  maximumDate: DateTime.now(),
+                  minimumDate: DateTime(1900),
+                  onDateTimeChanged: (date) {
+                    tempPickedDate = date;
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
-    if (picked != null) {
-      setState(() {
-        // 3. ここも修正：選んだ日付を変数に保存
-        _selectedDate = picked;
-        _birthdayController.text =
-            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
-      });
-    }
   }
 
   @override
