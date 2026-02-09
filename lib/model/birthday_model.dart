@@ -11,3 +11,18 @@ class BirthdayData {
     required this.imagePath,
   });
 }
+
+//birthdayカードモデル
+class BirthdayCardModel {
+  final String id;
+  final String senderName;
+  final String message;
+  final String imageUrl;
+
+  BirthdayCardModel({
+    required this.id,
+    required this.senderName,
+    required this.message,
+    required this.imageUrl,
+  });
+}

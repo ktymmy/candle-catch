@@ -12,7 +12,6 @@ import 'dart:math' as math;
 
 ///const
 import 'package:candlecatch/constants/colors.dart';
-import 'package:candlecatch/view/page/birthdayMemory/YearDetail.dart';
 
 ///components
 import '../../components/button.dart';
@@ -159,7 +158,9 @@ class _ProfileHeader extends StatelessWidget {
                 print('tap');
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyQrScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => MyQrScreen(userId: displayId),
+                  ),
                 );
               },
             ),

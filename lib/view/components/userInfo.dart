@@ -27,6 +27,8 @@ class UserIcon extends StatelessWidget {
 //縦並び
 class UserInfoColumn extends StatelessWidget {
   final String img;
+  final String name;
+
   final double? heights;
   final double? widths;
   const UserInfoColumn({
@@ -34,6 +36,7 @@ class UserInfoColumn extends StatelessWidget {
     this.img = "icon/icon1.png",
     this.heights,
     this.widths,
+    this.name = 'ちゃんみ',
   });
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,7 @@ class UserInfoColumn extends StatelessWidget {
         children: [
           Image.asset(img),
           Text(
-            '片山美結',
+            name,
             style: TextStyle(fontSize: 9, overflow: TextOverflow.visible),
           ),
         ],
@@ -57,13 +60,19 @@ class UserInfoColumn extends StatelessWidget {
 //横並び
 class UserInfoRow extends StatelessWidget {
   final String img;
-  const UserInfoRow({super.key, this.img = "icon/icon1.png"});
+  final String name;
+
+  const UserInfoRow({
+    super.key,
+    this.img = "icon/icon1.png",
+    this.name = 'ちゃんみ',
+  });
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Image.asset(img),
-        Text('UserName', style: TextStyle()),
+        Text(name, style: TextStyle()),
       ],
     );
   }

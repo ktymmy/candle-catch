@@ -6,8 +6,6 @@ class CustomTextField extends StatelessWidget {
   final String labelText;
   final String hintText;
   final bool obscureText;
-
-  // コントローラーを受け取るための変数を追加
   final TextEditingController? controller;
 
   const CustomTextField({
@@ -22,22 +20,45 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      obscureText: obscureText,
+      cursorColor: AppColors.bt,
+      style: const TextStyle(
+        fontSize: 16,
+        height: 1.4,
+        color: AppColors.textPrimary,
+      ),
       decoration: InputDecoration(
+        filled: true,
+        fillColor: const Color(0xFFF7F7FA),
+
         labelText: labelText,
-        hintText: hintText,
-        hintStyle: TextStyle(color: AppColors.textBlack),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.textBlack),
+        labelStyle: const TextStyle(
+          color: Color(0xFF8E8E93),
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.4,
         ),
+
+        hintText: hintText,
+        hintStyle: const TextStyle(color: Color(0xFFB0B0B5), fontSize: 15),
+
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 16,
+        ),
+
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.textBlack),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide.none, // 枠線消す
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.bt, width: 1.2),
         ),
       ),
-      obscureText: obscureText,
-      onTap: () {},
     );
   }
 }

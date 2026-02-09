@@ -40,11 +40,17 @@ class ButtonComponent extends StatelessWidget {
 class BrandGradientButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
+  final double? reqheight;
+  final double? reqwidth;
+  final double? reqfontsize;
 
   const BrandGradientButton({
     super.key,
     required this.text,
     required this.onPressed,
+    this.reqheight = 0.05,
+    this.reqwidth = 0.4,
+    this.reqfontsize,
   });
 
   @override
@@ -56,12 +62,15 @@ class BrandGradientButton extends StatelessWidget {
       width: width * 0.4,
       decoration: BoxDecoration(
         gradient: AppColors.kBrandGradient,
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            //TODO:Boxに影つける
+            color: Colors.black.withOpacity(0.15),
+            offset: const Offset(0, 6),
+            blurRadius: 12,
+            spreadRadius: 0,
           ),
         ],
-        borderRadius: BorderRadius.circular(15),
       ),
 
       child: ElevatedButton(
@@ -69,9 +78,15 @@ class BrandGradientButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
         ),
         child: Container(
-          child: Text(text, style: TextStyle(color: AppColors.textWhite)),
+          child: Text(
+            text,
+            style: TextStyle(color: AppColors.textWhite, fontSize: reqfontsize),
+          ),
         ),
       ),
     );
@@ -133,6 +148,56 @@ class TopCircleButton extends StatelessWidget {
           ],
         ),
         child: Icon(icon, color: Colors.white, size: size * 0.5),
+      ),
+    );
+  }
+}
+
+class ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const ActionButton({
+    Key? key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppColors.bt,
+            ),
+          ),
+        ],
       ),
     );
   }

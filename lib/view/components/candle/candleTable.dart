@@ -1,10 +1,12 @@
-//PAGE:キャンドルをテーブルに載せた状態のコンポーネント
+// PAGE: キャンドルをテーブルに載せた状態のコンポーネント
 import 'dart:math';
 import 'package:flutter/material.dart';
 import './candle.dart';
+import '../userInfo.dart';
+import '../../page/src/candleInfo.dart';
 
 class CandleTable extends StatefulWidget {
-  final List<String> items = ["A", "B", "C", "D", "E", "F", "G"];
+  final List<String> items = ["A", "B", "C", "D", "E", "F"];
 
   CandleTable({Key? key}) : super(key: key);
 
@@ -45,10 +47,8 @@ class CandleTableState extends State<CandleTable> {
     itemData.sort((a, b) => a.depth.compareTo(b.depth));
 
     return Container(
+      padding: const EdgeInsets.only(bottom: 60),
       child: GestureDetector(
-        onTap: () {
-          //TODO: キャンドル選択時の処理
-        },
         onHorizontalDragUpdate: (details) {
           setState(() {
             angle += details.delta.dx * sensitivity;
@@ -62,7 +62,38 @@ class CandleTableState extends State<CandleTable> {
                 offset: Offset(data.x, data.y * 0.4),
                 child: Transform.scale(
                   scale: data.scale,
-                  child: Opacity(opacity: data.opacity, child: Candle()),
+                  child: Opacity(
+                    opacity: data.opacity,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Candleinfo(
+                                  giverName: "ちゃんみ",
+                                  giverImageUrl: "assets/images/sample.png",
+                                ),
+                              ),
+                            );
+                          },
+                          child: Candle(),
+                        ),
+
+                        Positioned(
+                          bottom: 30,
+                          child: UserInfoColumn(
+                            img: "icon/icon${data.index + 1}.png",
+                            heights: 80,
+                            widths: 60,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -80,6 +111,7 @@ class _CircleItemData {
   final double depth;
   final double scale;
   final double opacity;
+
   _CircleItemData({
     required this.index,
     required this.x,

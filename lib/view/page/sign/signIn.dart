@@ -1,3 +1,4 @@
+//PAGE:ログイン
 import 'package:flutter/material.dart';
 import 'package:candlecatch/constants/colors.dart';
 import 'package:candlecatch/view/components/button.dart';

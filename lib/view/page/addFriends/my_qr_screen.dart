@@ -1,4 +1,4 @@
-// マイQRコード画面
+// PAGE:マイQRコード画面
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // クリップボード用
@@ -6,184 +6,157 @@ import 'package:flutter/services.dart'; // クリップボード用
 import 'package:flutter/foundation.dart' show kIsWeb; // Web判定用
 import 'qr_scan_screen.dart'; // 次の画面への遷移用
 import 'package:candlecatch/constants/colors.dart';
-
-// 色定数
+import '../../components/button.dart';
+import './friend_profile_screen.dart';
 
 class MyQrScreen extends StatelessWidget {
-  const MyQrScreen({super.key});
+  final String userId;
+  const MyQrScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
     // 画面サイズ
     final size = MediaQuery.of(context).size;
+    final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      // 背景画像を全体に設定
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('images/candleBackScreen.png'),
-            fit: BoxFit.cover,
-          ),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.bt, size: 30),
+          onPressed: () => Navigator.pop(context),
         ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              // コンテンツ部分
-              Column(
-                children: [
-                  // ヘッダー
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(height: size.height * 0.1),
+
+            Container(
+              width: width * 0.7,
+              alignment: Alignment.centerRight,
+              child: TopCircleButton(
+                size: 55,
+                icon: Icons.qr_code_2,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const QrScanScreen(),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // 閉じるボタン
-                        IconButton(
-                          icon: const Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        // QRスキャン画面へ遷移するボタン
-                        IconButton(
-                          icon: const Icon(
-                            Icons.qr_code_scanner,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const QrScanScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+                  );
+                },
+              ),
+            ),
+
+            SizedBox(height: size.height * 0.05),
+
+            // QRコードカード
+            Center(
+              child: Container(
+                width: size.width * 0.7,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFE082), Color(0xFFFFAB91)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-
-                  SizedBox(height: size.height * 0.1),
-
-                  // QRコードカード
-                  Center(
-                    child: Container(
-                      width: size.width * 0.7,
-                      padding: const EdgeInsets.all(20),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // QRコード枠
+                    Container(
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFFE082), Color(0xFFFFAB91)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                        border: Border.all(
+                          color: AppColors.textPrimary,
+                          width: 3,
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // QRコード枠
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.textPrimary,
-                                width: 3,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.qr_code_2,
-                              size: 150,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          // ID
-                          const Text(
-                            'sota_sota',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
+                      child: const Icon(
+                        Icons.qr_code_2,
+                        size: 150,
+                        color: AppColors.textPrimary,
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    // ID
+                    Text(
+                      userId,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: size.height * 0.05),
+
+            Padding(
+              padding: const EdgeInsets.only(bottom: 50),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // シェアボタン、chromeでの確認なので実機で期待している動作ができるかは不明
+                  ActionButton(
+                    icon: Icons.share,
+                    label: 'シェア',
+                    onTap: () {
+                      if (kIsWeb) {
+                        _showSnackBar(context, 'シェア画面を開きます');
+                      } else {
+                        // Share.share('私のCandleCatch IDは sota_sota です！ https://candlecatch.com/id/sota_sota');
+                      }
+                    },
                   ),
-
-                  const Spacer(),
-
-                  // アクションボタン列
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 50),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // シェアボタン、chromeでの確認なので実機で期待している動作ができるかは不明
-                        _ActionButton(
-                          icon: Icons.share,
-                          label: 'シェア',
-                          onTap: () {
-                            if (kIsWeb) {
-                              _showSnackBar(context, 'シェア画面を開きます');
-                            } else {
-                              // Share.share('私のCandleCatch IDは sota_sota です！ https://candlecatch.com/id/sota_sota');
-                            }
-                          },
+                  const SizedBox(width: 15),
+                  // リンクコピー
+                  ActionButton(
+                    icon: Icons.link,
+                    label: 'リンクコピー',
+                    onTap: () {
+                      Clipboard.setData(
+                        const ClipboardData(
+                          text: "https://candlecatch.com/id/sota_sota",
                         ),
-                        const SizedBox(width: 15),
-                        // リンクコピー
-                        _ActionButton(
-                          icon: Icons.link,
-                          label: 'リンクコピー',
-                          onTap: () {
-                            Clipboard.setData(
-                              const ClipboardData(
-                                text: "https://candlecatch.com/id/sota_sota",
-                              ),
-                            );
-                            _showSnackBar(context, 'リンクをコピーしました！');
-                          },
-                        ),
-                        const SizedBox(width: 15),
-                        // ダウンロード
-                        _ActionButton(
-                          icon: Icons.download,
-                          label: 'ダウンロード',
-                          onTap: () =>
-                              _showSnackBar(context, 'QRコードをダウンロードしました！'),
-                        ),
-                        const SizedBox(width: 15),
-                        // ID検索
-                        _ActionButton(
-                          icon: Icons.search,
-                          label: 'ID検索',
-                          onTap: () => _showIdSearchDialog(context),
-                        ),
-                      ],
-                    ),
+                      );
+                      _showSnackBar(context, 'リンクをコピーしました！');
+                    },
+                  ),
+                  const SizedBox(width: 15),
+                  // ダウンロード
+                  ActionButton(
+                    icon: Icons.download,
+                    label: 'ダウンロード',
+                    onTap: () => _showSnackBar(context, 'QRコードをダウンロードしました！'),
+                  ),
+                  const SizedBox(width: 15),
+                  // ID検索
+                  ActionButton(
+                    icon: Icons.search,
+                    label: 'ID検索',
+                    onTap: () => _showIdSearchDialog(context),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -205,75 +178,59 @@ class MyQrScreen extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: AppColors.background,
           title: const Text('ID検索'),
           content: TextField(
             controller: _controller,
-            decoration: const InputDecoration(hintText: "検索したいIDを入力"),
+            cursorColor: Colors.grey,
+            style: const TextStyle(fontSize: 16),
+            decoration: InputDecoration(
+              hintText: "検索したいIDを入力",
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+
+              filled: true,
+              fillColor: const Color(0xFFF2F2F7), // iOS風グレー
+
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 14,
+                horizontal: 16,
+              ),
+
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none, // 枠線なし
+              ),
+            ),
           ),
+
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('キャンセル'),
+              child: const Text('キャンセル', style: TextStyle(color: AppColors.bt)),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.bt),
               onPressed: () {
+                final id = _controller.text.trim();
                 Navigator.pop(context);
-                _showSnackBar(context, '${_controller.text} を検索しました');
+
+                if (id.isEmpty) return;
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FriendProfileScreen(friendUid: id),
+                  ),
+                );
               },
-              child: const Text('検索'),
+              child: const Text(
+                '検索',
+                style: TextStyle(color: AppColors.textWhite),
+              ),
             ),
           ],
         );
       },
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(icon, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

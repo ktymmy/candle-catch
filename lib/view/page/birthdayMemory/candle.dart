@@ -43,16 +43,6 @@ class candle extends StatelessWidget {
               _BestShot(year: year, imagePath: imagePath),
               SizedBox(height: height * 0.03),
 
-              Text(
-                'キャンドル',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textWhite,
-                ),
-              ),
-              SizedBox(height: height * 0.02),
-
               Container(width: width, child: CandleTable()),
             ],
           ),
